@@ -14,7 +14,8 @@ cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, screen_w)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, screen_h)
 
-click_count=0
+click_count = 0
+pinky_up_count = 0
 prev_x, prev_y = None, None
 paused = False  # for two fingers up
 
@@ -39,8 +40,8 @@ while True:
             # Check finger states
             index_up = lm[8].y < lm[6].y
             middle_up = lm[12].y < lm[10].y
+            pinky_up = lm[20].y < lm[18].y
             
-            # is_right_hand = lm[17].x > lm[0].x  
             is_right_hand = (lm[5].x < lm[9].x) and (lm[13].x < lm[17].x)
 
             if is_right_hand:
@@ -74,8 +75,15 @@ while True:
                 prev_x, prev_y = x, y
             else:
                 prev_x, prev_y = None, None
+            
+            if pinky_up:
+                pyautogui.mouseDown()
+                pinky_up_count += 1
+                
+            elif pinky_up_count >= 1 and not pinky_up:
+                pyautogui.mouseUp()
+                pinky_up_count = 0
 
-            # Left click if thumb up
             # Left click if thumb up
             if thumb_up:
                 if thumb_start_time is None:
@@ -94,7 +102,7 @@ while True:
                     pyautogui.doubleClick()
                     click_count += 2
                     double_clicked = True
-
+                    
             else:
                 # Reset when thumb goes down
                 thumb_start_time = None
@@ -116,27 +124,31 @@ while True:
             text3 = f"lm4_px: {lm4_px}, lm3_px: {lm3_px}"
 
             # Draw text at top-left
-            cv2.putText(img, text1, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-            cv2.putText(img, text2, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-            cv2.putText(img, text3, (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-            cv2.putText(img, f"is right hand: {is_right_hand}", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-            cv2.putText(img, f"lm[4].x <= lm[3].x: {lm[4].x <= lm[3].x}", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-            cv2.putText(img, f"lm[3].y <= lm[4].y: {lm[3].y <= lm[4].y}", (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-            cv2.putText(img, f"click count: {click_count}", (10, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-
+            cv2.putText(img, text1, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+            cv2.putText(img, text2, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+            cv2.putText(img, text3, (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+            cv2.putText(img, f"is right hand: {is_right_hand}", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+            cv2.putText(img, f"lm[4].x <= lm[3].x: {lm[4].x <= lm[3].x}", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+            cv2.putText(img, f"lm[3].y <= lm[4].y: {lm[3].y <= lm[4].y}", (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+            cv2.putText(img, f"click count: {click_count}", (10, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
             # Draw GREEN circles if finger is UP
             if index_up:
                 cx, cy = int(lm[8].x * w), int(lm[8].y * h)
-                cv2.circle(img, (cx, cy), 15, (0, 255, 0), cv2.FILLED)
+                cv2.circle(img, (cx, cy), 15, (255, 255, 0), cv2.FILLED)
 
             if middle_up:
                 cx, cy = int(lm[12].x * w), int(lm[12].y * h)
-                cv2.circle(img, (cx, cy), 15, (0, 255, 0), cv2.FILLED)
+                cv2.circle(img, (cx, cy), 15, (255, 255, 0), cv2.FILLED)
 
             if thumb_up:
                 cx, cy = int(lm[4].x * w), int(lm[4].y * h)
-                cv2.circle(img, (cx, cy), 15, (0, 255, 0), cv2.FILLED)
+                cv2.circle(img, (cx, cy), 15, (255, 255, 0), cv2.FILLED)
+                
+            if pinky_up:
+                cx, cy = int(lm[20].x * w), int(lm[20].y * h)
+                cv2.circle(img, (cx, cy), 15, (255, 255, 0), cv2.FILLED)  # Yellow circle for pinky
+
 
     # 🔥 Resize the camera frame to fit window size (stretch)
     window_rect = cv2.getWindowImageRect("Hand Tracking")
