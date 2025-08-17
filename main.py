@@ -66,8 +66,8 @@ while True:
                     screen_w, screen_h = pyautogui.size()
                     new_x = pyautogui.position().x + dx
                     new_y = pyautogui.position().y + dy
-                    new_x = max(1, min(screen_w - 2.5, new_x))
-                    new_y = max(1, min(screen_h - 2.5, new_y))
+                    new_x = max(1, min(screen_w - 2, new_x))
+                    new_y = max(1, min(screen_h - 2, new_y))
 
                     pyautogui.moveTo(new_x, new_y)
 
@@ -85,14 +85,12 @@ while True:
 
                 elapsed = time.time() - thumb_start_time
 
-                # Single click after 1s
-                if elapsed >= 0.75 and not clicked_once:
+                if elapsed >= 0.5 and not clicked_once:
                     pyautogui.click()
                     click_count += 1
                     clicked_once = True
 
-                # Double click after 1.5s (so total 3 clicks)
-                if elapsed >= 2.25 and clicked_once and not double_clicked:
+                if elapsed >= 2 and clicked_once and not double_clicked:
                     pyautogui.doubleClick()
                     click_count += 2
                     double_clicked = True
